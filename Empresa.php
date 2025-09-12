@@ -48,7 +48,7 @@ Class Empresa {
     
     //Metodo para insertar un objeto empresa a la base de datos
     public function insertar() {
-        $base = new BaseDatos();
+        $base = new DataBase();
         $resp = false;
         $consultaInsertar = "INSERT INTO empresa(enombre, edireccion) VALUES ('". $this->getNombre() ."', '".$this->getDireccion()."')";
         if ($base->Iniciar()) {
@@ -67,15 +67,17 @@ Class Empresa {
 
     //Metodo que busca una empresa por su ID
     public function buscar(int $idEmpresa) {
-        $base = new BaseDatos();
+        $base = new DataBase();
         $consultaPersona = "SELECT * FROM empresa WHERE idEmpresa='" . $idEmpresa . "'";
         $rta = false;
         if ($base->Iniciar()) {
-            if($base->Ejecutar($consultaPersona)) {
+            if($base->ejecutar($consultaPersona)) {
                 if($empresa = $base->registro()) {
-                    $this->cargar($empresa['enombre'], $empresa['edireccion']);
-                    $this->setIdEmpresa($empresa['idempresa']);
-                    $rta = true;
+                    if(is_array($empresa)){
+                        $this->cargar($empresa['enombre'], $empresa['edireccion']);
+                        $this->setIdEmpresa($empresa['idempresa']);
+                        $rta = true;
+                    }
                 } 
             } else {
                 $this->setMensajeOperacion($base->getError());
@@ -88,12 +90,12 @@ Class Empresa {
 
     //Metodo para modificar los datos de una empresa
     public function modificar() {
-        $base = new BaseDatos();
+        $base = new DataBase();
         $consulta = "UPDATE empresa SET enombre = '" .$this->getNombre() . "', edireccion = '". $this->getDireccion() . "' WHERE idempresa = " . $this->getIdEmpresa();
         $rta = false;
 
         if ($base->Iniciar()) {
-            if ($base->Ejecutar($consulta)) {
+            if ($base->ejecutar($consulta)) {
                 $rta = true;
             } else {
                 $this->setMensajeOperacion($base->getError());
@@ -106,11 +108,11 @@ Class Empresa {
 
     //Metodo para eliminar una empresa de la base de datos
     public function eliminar() {
-        $base = new BaseDatos();
+        $base = new DataBase();
         $consulta = "DELETE FROM empresa WHERE idempresa = " . $this->getIdEmpresa();
         $rta = false;
         if ($base->Iniciar()) {
-            if ($base->Ejecutar($consulta)) {
+            if ($base->ejecutar($consulta)) {
             $rta =true;
             } else {
                 $this->setMensajeOperacion($base->getError());
@@ -124,7 +126,7 @@ Class Empresa {
     //Metodo para listar empresas segun una condicion, devuelve en un arreglo cada una
     public function listar($condicion = "") {
         $arregloEmpresa = null;
-        $base = new BaseDatos();
+        $base = new DataBase();
         $consulta = "SELECT * FROM empresa ";
         if ($condicion != "") {
             $consulta .= "WHERE $condicion ";
@@ -132,9 +134,9 @@ Class Empresa {
         $consulta.= "ORDER BY enombre";
 
         if ($base->Iniciar()) {
-            if ($base->Ejecutar($consulta)) {
+            if ($base->ejecutar($consulta)) {
                 $arregloEmpresa = [];
-                while ($empresaEncontrada = $base->Registro()) {
+                while ($empresaEncontrada = $base->registro()) {
                     $empresa = new Empresa();
                     $empresa->cargar(
                         $empresaEncontrada["enombre"],
@@ -152,7 +154,6 @@ Class Empresa {
         return $arregloEmpresa;
     }
 
-    //Redefinimos el metodo __toString
     public function __toString() {
         return 
         "Nombre: " . $this->getNombre() . "\n" . 

@@ -65,7 +65,7 @@ class DataBase {
      * @param string $consulta
      * @return boolean
      */
-    public function Ejecutar($consulta){
+    public function ejecutar($consulta){
         $resp  = false;
         unset($this->ERROR);
         $this->QUERY = $consulta;
@@ -83,7 +83,7 @@ class DataBase {
      *
      * @return boolean
      */
-    public function Registro() {
+    public function registro() {
         $resp = null;
         if ($this->RESULT){
             unset($this->ERROR);

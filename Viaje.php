@@ -140,8 +140,8 @@ Class Viaje {
         $rta = false;
         $consulta = "SELECT * FROM viaje WHERE idviaje = " . $idviaje;
         if ($dataBase->Iniciar()) {
-            if ($dataBase->Ejecutar($consulta)) {
-                if ($viaje = $dataBase->Registro()) {
+            if ($dataBase->ejecutar($consulta)) {
+                if ($viaje = $dataBase->registro()) {
                     $pasajero = new Pasajero();
                     $this->setIdViaje($idviaje);
                     $empresa = new Empresa();
@@ -182,7 +182,7 @@ Class Viaje {
         $rta = false;
 
         if ($dataBase->Iniciar()) {
-            if ($dataBase->Ejecutar($consulta)) {
+            if ($dataBase->ejecutar($consulta)) {
                 $rta = true;
             } else {
                 $this->setMensajeOperacion($dataBase->getError());
@@ -200,7 +200,7 @@ Class Viaje {
         $consulta = "DELETE FROM viaje WHERE idviaje = '" . $this->getIdViaje() . "'";
 
         if ($dataBase->Iniciar()) {
-            if($dataBase->Ejecutar($consulta)) {
+            if($dataBase->ejecutar($consulta)) {
                 $rta = true;
             } else {
                 $this->setMensajeOperacion($dataBase->getError());
@@ -222,9 +222,9 @@ Class Viaje {
             $consulta .= "WHERE $condicion ";
         }
         if ($dataBase->Iniciar()) {
-            if ($dataBase->Ejecutar($consulta)) {
+            if ($dataBase->ejecutar($consulta)) {
                 $viajes = [];
-                while ($viajeEncontrado = $dataBase->Registro()) {
+                while ($viajeEncontrado = $dataBase->registro()) {
                     $pasajero = new Pasajero();
                     $responsable = new ResponsableViaje();
                     $responsable->buscar($viajeEncontrado['rnumeroempleado']);
