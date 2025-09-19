@@ -16,7 +16,7 @@ class DataBase {
      */
     public function __construct(){
         $this->HOSTNAME = "127.0.0.1";
-        $this->BASEDATOS = "bdviajes2";
+        $this->BASEDATOS = "bdviajes";
         $this->USUARIO = "root";
         $this->CLAVE="";
         $this->RESULT=0;
