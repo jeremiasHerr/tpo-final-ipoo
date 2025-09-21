@@ -11,8 +11,8 @@ function menuPrincipal()
         echo "\n -------------------------------Menu principal-------------------------------";
         echo "\n1. Menu Empresas";
         echo "\n2. Menu Viajes";
-        echo "\n3. Menu responsables";
-        echo "\n4. Menu pasajeros";
+        echo "\n3. Menu Responsables";
+        echo "\n4. Menu Pasajeros";
         echo "\n5. Salir del programa\n";
         $opcion = trim(fgets(STDIN));
         switch ($opcion) {
@@ -37,18 +37,127 @@ function menuPrincipal()
     } while ($continuarMenu);
 }
 
-function menuResponsables(){
+function menuPasajeros(){
+    $continuar = true;
+    do{
+        echo "\n-------------------------------Menu Pasajeros-------------------------------\n";
+        echo "1. Crear y agregar un pasajero a un viaje\n"
+        echo 
+    }while($continuar);
+}
+
+function menuResponsables()
+{
     $continuarMenu = true;
     do {
-        echo "\n1. Crear un responsable";
-        echo "";
-    } while($continuarMenu);
+        echo "\n-------------------------------Menu Responsables-------------------------------";
+        echo "\n1. Crear un responsable\n";
+        echo "\n2. Listar los responsables\n";
+        echo "\n3. Modificar un responsable\n";
+        echo "\n4. Volver al menu principal\n";
+        $opcion = trim(fgets(STDIN));
+        switch ($opcion) {
+            case 1:
+                menuCrearResponsable();
+                break;
+            case 2:
+                listarResponsables();
+                break;
+            case 3:
+                modificarResponsableMenu();
+                break;
+            case 4:
+                $continuarMenu = false;
+                break;
+            default:
+                echo "\Opcion ingresada invalida\n";
+                break;
+        }    } while ($continuarMenu);
+}
+
+function modificarResponsableMenu()
+{
+    echo "Ingrese el numero de empleado del responsable a modificar: \n";
+    $numeroEmpleado = trim(fgets(STDIN));
+    echo "Ingrese el nuevo numero de licencia: \n";
+    $numeroLicencia = trim(fgets(STDIN));
+    echo "Ingresa el nuevo nombre: \n";
+    $nombre = trim(fgets(STDIN));
+    echo "Ingresa el nuevo apellido: \n";
+    $apellido = trim(fgets(STDIN));
+    if (modificarResponsable($numeroEmpleado, $numeroLicencia, $nombre, $apellido)) {
+        echo "\nEl responsable ha sido modificado con exito!\n";
+    } else {
+        echo "\nNo es posible modificar el responsable.\n";
+    }
+}
+
+function modificarResponsable($numeroEmpleado, $numeroLicencia, $nombreResponsable, $apellidoResponsable){
+    $exito = false;
+    $responsable = new ResponsableViaje();
+    if(is_numeric($numeroEmpleado)){
+        if($responsable->buscar($numeroEmpleado)){
+            $responsable->setRnumeroLicencia($numeroLicencia);
+            $responsable->setNombre($nombreResponsable);
+            $responsable->setApellido($apellidoResponsable);
+            $exito = $responsable->modificar();
+        } else {
+            echo "\nNo se encontró un responsable de viaje con el numero de empleado ingresado.\n";
+        }
+    } else {
+        echo "\nNumero de empleado ingresado invalido\n";
+    }
+}
+
+function listarResponsables()
+{
+    $responsable = new ResponsableViaje();
+    $responsables = $responsable->listar();
+    if ($responsables != null) {
+        foreach ($responsables as $responsableViaje) {
+            echo "\n $responsableViaje \n";
+        }
+    } else {
+        echo "\nNo existen responsables.\n";
+    }
+}
+
+function menuCrearResponsable()
+{
+    echo "\nAgregar responsable\n";
+    echo "Ingrese el nombre: ";
+    $nombreResponsable = trim(fgets(STDIN));
+    echo "Ingrese el apellido: ";
+    $apellidoResponsable = trim(fgets(STDIN));
+    echo "Ingrese el numero de documento: ";
+    $documentoResponsable = trim(fgets(STDIN));
+    echo "Ingrese el numero de licencia: ";
+    $numeroLicenciaResponsable = trim(fgets(STDIN));
+    echo "Ingrese el numero de empleado: ";
+    $numeroEmpleadoResponsable = trim(fgets(STDIN));
+    crearResponsable($nombreResponsable, $apellidoResponsable, $documentoResponsable, $numeroLicenciaResponsable, $numeroEmpleadoResponsable);
+}
+
+function crearResponsable($nombreResponsable, $apellidoResponsable, $documentoResponsable, $numeroLicenciaResponsable, $numeroEmpleadoResponsable)
+{
+    $responsable = new ResponsableViaje();
+    if (!$responsable->buscar($numeroEmpleadoResponsable)) {
+        $responsable->cargarRe($documentoResponsable, $nombreResponsable, $apellidoResponsable, $numeroLicenciaResponsable, $numeroEmpleadoResponsable);
+        if ($responsable->insertar()) {
+            echo "\nResponsable de viaje agregado con exito.\n";
+        } else {
+            echo "\nNo se pudo agregar al responsable de viaje\n";
+        }
+    } else {
+        echo "\nYa existe un responsable de viaje con ese numero de empleado.\n";
+    }
 }
 
 function menuViajes()
 {
     $continuarMenu = true;
     do {
+        echo "\n-------------------------------Menu Viajes-------------------------------";
         echo "\n1. Crear viaje.";
         echo "\n2. Modificar un viaje";
         echo "\n3. Eliminar un viaje;";
@@ -81,22 +190,24 @@ function menuViajes()
     } while ($continuarMenu);
 }
 
-function listarViajes(){
+function listarViajes()
+{
     $viaje = new Viaje();
     $viajes = $viaje->listar();
-    if($viajes!=null){
-        foreach($viajes as $viaje){
+    if ($viajes != null) {
+        foreach ($viajes as $viaje) {
             echo "\n$viaje\n";
         }
-    } else{
+    } else {
         echo "\nNo hay viajes a listar\n";
     }
 }
 
-function eliminarViaje($idViaje){
+function eliminarViaje($idViaje)
+{
     $viaje = new Viaje();
-    if($viaje->buscar($idViaje)){
-        $viaje->eliminar($idViaje);
+    if ($viaje->buscar($idViaje)) {
+        $viaje->eliminar();
     } else {
         echo "\nViaje no encontrado.\n";
     }
@@ -111,7 +222,7 @@ function menuCrearViaje()
     $nroResponsableViaje = trim(fgets(STDIN));
     echo "Ingrese el costo del viaje: ";
     $importeViaje = trim(fgets(STDIN));
-    echo "Ingrese el id de la empresa a la que desea agregar el viaje: ";
+    echo "Ingrese el id de la empresa encargada del viaje: ";
     $idEmpresaViaje = trim(fgets(STDIN));
     if (crearViaje($destinoViaje, $cantMaxPasajerosViaje, [], $nroResponsableViaje, $importeViaje, $idEmpresaViaje)) {
         echo "\nViaje agregado con exito.\n";
@@ -120,17 +231,21 @@ function menuCrearViaje()
     }
 }
 
-function crearViaje($destinoViaje, $nuevaCantMaxPasajeros, $pasajeros, $nroResponsable, $nuevoImporteViaje, $idEmpresaViaje) {
+function crearViaje($destinoViaje, $nuevaCantMaxPasajeros, $pasajeros, $nroResponsable, $nuevoImporteViaje, $idEmpresaViaje)
+{
+    $exito = false;
     $responsableViaje = new ResponsableViaje();
-    if($responsableViaje->buscar($nroResponsable)){
+    if ($responsableViaje->buscar($nroResponsable)) {
         $empresa = new Empresa();
-        if($empresa->buscar($idEmpresaViaje)){
-            if(is_numeric($nuevaCantMaxPasajeros)){
-                if(is_numeric($nuevoImporteViaje)){
+        if ($empresa->buscar($idEmpresaViaje)) {
+            if (is_numeric($nuevaCantMaxPasajeros)) {
+                if (is_numeric($nuevoImporteViaje)) {
                     $viaje = new Viaje();
-                    $viaje->crear($destinoViaje,$nuevaCantMaxPasajeros,$pasajeros,$responsableViaje,$nuevoImporteViaje,$empresa);
+                    $viaje->crear($destinoViaje, $nuevaCantMaxPasajeros, $pasajeros, $responsableViaje, $nuevoImporteViaje, $empresa);
+                    $viaje->insertar();
+                    $exito = true;
                 } else {
-                    echo"\nImporte invalido.";
+                    echo "\nImporte invalido.";
                 }
             } else {
                 echo "\nCantidad maxima de pasajeros invalida.";
@@ -141,12 +256,13 @@ function crearViaje($destinoViaje, $nuevaCantMaxPasajeros, $pasajeros, $nroRespo
     } else {
         echo "\nNo existe un responsable de viaje con ese numero\n";
     }
+    return $exito;
 }
 
 function modificarViajeMenu()
 {
     echo "\nIngrese el ID del viaje a modificar: ";
-    $nuevoIdViaje = trim(fgets(STDIN));
+    $idViaje = trim(fgets(STDIN));
     echo "\nIngrese el nuevo destino: ";
     $nuevoDestino = trim(fgets(STDIN));
     echo "\nIngrese la cantidad maxima de pasajeros: ";
@@ -157,13 +273,44 @@ function modificarViajeMenu()
     $nuevoImporteViaje = trim(fgets(STDIN));
     echo "\nIngrese el ID de la empresa que realiza el viaje: ";
     $nuevoIdEmpresa = trim(fgets(STDIN));
-    if (modificarViaje($nuevoIdViaje, $nuevoDestino, $nuevaCantidadMaxima, [], $nuevoNroResponsable, $nuevoImporteViaje, $nuevoIdEmpresa)) {
+    if (modificarViaje($idViaje, $nuevoDestino, $nuevaCantidadMaxima, [], $nuevoNroResponsable, $nuevoImporteViaje, $nuevoIdEmpresa)) {
         echo "\nViaje modificado con exito.\n";
     } else {
         echo "\nError al intentar modificar el viaje.\n";
     }
 }
 
+function modificarViaje($idViaje, $nuevoDestino, $nuevaCantidadMaxima, $pasajeros, $nuevoNroResponsable, $nuevoImporteViaje, $nuevoIdEmpresa){
+    $responsableViaje = new ResponsableViaje();
+    $exito = false;
+    if ($responsableViaje->buscar($nuevoNroResponsable)) {
+        $empresa = new Empresa();
+        if ($empresa->buscar($nuevoIdEmpresa)) {
+            if (is_numeric($nuevaCantidadMaxima)) {
+                if (is_numeric($nuevoImporteViaje)) {
+                    $viaje = new Viaje();
+                    if($viaje->buscar($idViaje)){
+                        $viaje->setObjEmpresa($empresa);
+                        $viaje->setvCantMaxPasajeros($nuevaCantidadMaxima);
+                        $viaje->setObjResponsableV($responsableViaje);
+                        $viaje->setvImporte($nuevoImporteViaje);
+                        $viaje->setvDestino($nuevoDestino);
+                        $exito = true;
+                    } else {
+                        echo "\nViaje a modificar no encontrado\n";
+                    }
+                } else {
+                    echo "\nImporte ingresado invalido\n";
+                }
+            } else {
+                echo "\nCantidad maxima de pasajeros ingresada invalida\n";   
+            }
+        } else {
+            echo "\nEmpresa no encontrada\n";
+        }
+    }
+    return $exito;
+}
 
 function menuEmpresa()
 {
@@ -189,7 +336,7 @@ function menuEmpresa()
                 if ($empresaNueva->insertar()) {
                     echo "\nEmpresa creada con exito.\n";
                 } else {
-                    echo "\nError al crear la empresa: " . $empresaNueva->getMensajeError() . "\n";
+                    echo "\nError al crear la empresa: " . $empresaNueva->getMensajeOperacion() . "\n";
                 }
                 break;
             case 2:

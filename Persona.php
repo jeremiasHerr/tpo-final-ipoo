@@ -6,7 +6,7 @@ class Persona
     private $nombre;
     private $apellido;
     private $documento;
-    private $mensajeoperacion;
+    protected $mensajeOperacion;
 
     //Metodo constructor de la clase
     public function __construct()

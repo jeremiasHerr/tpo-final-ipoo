@@ -5,7 +5,6 @@ include_once "Persona.php";
 
         private $rnumeroEmpleado;
         private $rnumeroLicencia;
-        private $mensajeOperacion;
         
         public function __construct () {
             parent::__construct();
@@ -40,14 +39,15 @@ include_once "Persona.php";
             $cadena .=
             "El numero de empleado es: " . $this->getRnumeroEmpleado() . "\n" . 
             "El numero de licencia es: " . $this->getRnumeroLicencia() . "\n";
-        return $cadena;
+            return $cadena;
         }
 
 
         //Constructor con valores
-        public function cargarRe($pdocumento, $pnombre, $papellido, $numeroLicencia) {
+        public function cargarRe($pdocumento, $pnombre, $papellido, $numeroLicencia,$numeroEmpleado) {
             parent::cargar($pdocumento, $pnombre, $papellido);
             $this ->setRnumeroLicencia($numeroLicencia);
+            $this ->setRnumeroEmpleado($numeroEmpleado);
         }
 
         //Metodo para instertar los datos de un objeto a la base de datos

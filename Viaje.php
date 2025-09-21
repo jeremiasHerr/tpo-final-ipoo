@@ -97,6 +97,11 @@ Class Viaje {
     public function setvDestino($value) {
         $this->vdestino = $value;
     }
+
+    public function setObjPasajeros($valor){
+        $this->objPasajeros = $valor;
+    }
+
     public function setObjResponsableV($value) {
         $this->objResponsableV = $value;
     }

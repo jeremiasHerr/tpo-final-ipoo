@@ -3,7 +3,6 @@
     class Pasajero extends Persona {
         private $ptelefono;
         private $objViaje;
-        private $mensajeOperacion;
 
         //Metodo constructor
         public function __construct () {
