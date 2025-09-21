@@ -2,21 +2,21 @@
     include_once "Persona.php";
     class Pasajero extends Persona {
         private $ptelefono;
-        private $objViaje;
+        private $idViajePertenece;
 
         //Metodo constructor
         public function __construct () {
             parent::__construct();
             $this -> ptelefono = 0;
-            $this->objViaje = null;
+            $this->idViajePertenece = null;
         }
 
         //Getters y setters
         public function getPtelefono () {
             return $this -> ptelefono;
         }
-        public function getObjViaje () {
-            return $this -> objViaje;
+        public function getIdViaje () {
+            return $this -> idViajePertenece;
         }
         public function getMensajeOperacion () {
             return $this -> mensajeOperacion;
@@ -25,8 +25,8 @@
         public function setPtelefono ($value) {
             $this -> ptelefono = $value;
         }
-        public function setObjViaje ($value) {
-            $this -> objViaje = $value;
+        public function setIdViaje ($value) {
+            $this -> idViajePertenece = $value;
         }
         public function setMensajeOperacion ($value) {
             $this -> mensajeOperacion = $value;
@@ -36,15 +36,15 @@
             $cadena = parent::__toString();
             $cadena .=
             "El telefono es: " . $this->getPtelefono() . "\n".
-            "El id del viaje es: " . $this->getObjViaje()->getIdViaje() . "\n" ."\n";
+            "El id del viaje es: " . $this->getIdViaje()->getIdViaje() . "\n" ."\n";
             return $cadena;
         } 
 
         //Metodo constructor con valores
-        public function cargarPasajero ($pdocumento, $pnombre, $papellido,  $ptelefono, $objViaje) {
+        public function cargarPasajero ($pdocumento, $pnombre, $papellido,  $ptelefono, $idViaje) {
             parent::cargar($pdocumento, $pnombre, $papellido);
             $this ->setPtelefono($ptelefono);
-            $this ->setObjViaje($objViaje);
+            $this ->setIdViaje($idViaje);
         } 
 
         //Metodo para insertar un objeto pasajero en la base de datos
@@ -56,7 +56,7 @@
             "INSERT INTO pasajero(pdocumento, ptelefono, idviaje) 
             VALUES ('" . $this->getDocumento() . "',
                     '" . $this->getPtelefono() . "',
-                    '" . $this->getObjViaje()->getIdViaje() . "'
+                    '" . $this->getIdViaje(). "'
                     )";
             if ($baseDatos->Iniciar()) {
                 if ($baseDatos->ejecutar($consultaInsertar)) {
@@ -107,7 +107,7 @@
             if (parent::modificar()) {
             $consulta = "UPDATE pasajero SET 
                         ptelefono= '". $this->getPtelefono() ."',
-                        idviaje= '". $this->getObjViaje()->getIdViaje() ."'
+                        idviaje= '". $this->getIdViaje() ."'
                         WHERE pdocumento ='". $this->getDocumento() ."' ";
             $respuesta = false;
             if ($baseDatos->Iniciar()) {

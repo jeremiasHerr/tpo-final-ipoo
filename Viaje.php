@@ -154,7 +154,7 @@ Class Viaje {
                     $empleado = new ResponsableViaje();
                     $empleado->setRnumeroEmpleado($viaje['rnumeroempleado']);
                     $empleado->buscar($viaje['rnumeroempleado']);
-                    $this->cargar(
+                    $this->crear(
                         $viaje['vdestino'],
                         $viaje['vcantmaxpasajeros'],
                         [],
