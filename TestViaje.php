@@ -46,6 +46,7 @@ function menuPasajeros()
         echo "1. Crear y agregar un pasajero a un viaje\n";
         echo "2. Modificar un pasajero\n";
         echo "3. Listar los pajaeros\n";
+        echo "4. Volver al menu principal\n";
         $opcion = trim(string: fgets(STDIN));
         switch ($opcion) {
             case 1:
@@ -166,7 +167,8 @@ function menuResponsables()
         echo "\n1. Crear un responsable\n";
         echo "\n2. Listar los responsables\n";
         echo "\n3. Modificar un responsable\n";
-        echo "\n4. Volver al menu principal\n";
+        echo "\n4. Eliminar un responsable \n";
+        echo "\n5. Volver al menu principal\n";
         $opcion = trim(string: fgets(STDIN));
         switch ($opcion) {
             case 1:
@@ -179,6 +181,9 @@ function menuResponsables()
                 modificarResponsableMenu();
                 break;
             case 4:
+                eliminarResponsableMenu();
+                break;
+            case 5:
                 $continuarMenu = false;
                 break;
             default:
@@ -186,6 +191,43 @@ function menuResponsables()
                 break;
         }
     } while ($continuarMenu);
+}
+
+function eliminarResponsableMenu()
+{
+    echo "Ingrese el numero de empleado a eliminar: ";
+    $numeroEmpleado = trim(fgets(STDIN));
+    echo "ingrese el numero de documento: ";
+    $numDoc = trim(fgets(STDIN));
+    if (eliminarResponsable($numeroEmpleado, $numDoc)) {
+        echo "\nEl responsable ha sido eliminado con exito!\n";
+    } else {
+        echo "\nError, el responsable no ha sido eliminado.\n";
+    }
+}
+
+function eliminarResponsable($numeroEmpleado, $numDoc)
+{
+    $responsable = new ResponsableViaje;
+    $exito = false;
+    if (is_numeric($numeroEmpleado)) {
+        if ($responsable->buscar($numeroEmpleado)) {
+            try{
+                $respuesta = $responsable->eliminar();
+                $persona = new Persona;
+                $persona->buscar($numDoc);
+                $persona->eliminar();
+                $exito = true;
+            }catch(mysqli_sql_exception $e){
+                echo "\nEl responsable que intentó eliminar se encuentra como parte de un viaje, primero debe modificar o eliminar dicho viaje";
+            }
+        } else {
+            echo "\No fue encontrado ningun responsable con ese numero de empleado\n";
+        }
+    } else {
+        echo "\nNumero de empleado ingresado invalido.\n";
+    }
+    return $exito;
 }
 
 function modificarResponsableMenu()
@@ -199,7 +241,7 @@ function modificarResponsableMenu()
     echo "Ingresa el nuevo apellido: \n";
     $apellido = trim(fgets(STDIN));
     if (modificarResponsable($numeroEmpleado, $numeroLicencia, $nombre, $apellido)) {
-        echo "\nEl responsable ha sido modificado con exito!\n";
+        echo "\nEl responsable ha sido modificado con exito\n";
     } else {
         echo "\nNo es posible modificar el responsable.\n";
     }
@@ -214,13 +256,14 @@ function modificarResponsable($numeroEmpleado, $numeroLicencia, $nombreResponsab
             $responsable->setRnumeroLicencia($numeroLicencia);
             $responsable->setNombre($nombreResponsable);
             $responsable->setApellido($apellidoResponsable);
-            $exito = $responsable->modificar();
+            $exito = $responsable->modificarR();
         } else {
             echo "\nNo se encontró un responsable de viaje con el numero de empleado ingresado.\n";
         }
     } else {
         echo "\nNumero de empleado ingresado invalido\n";
     }
+    return $exito;
 }
 
 function listarResponsables()
@@ -482,8 +525,18 @@ function eliminarEmpresa($idEmpresa)
     $exito = false;
     if (is_numeric($idEmpresa) && $idEmpresa > 0) {
         if ($empresa->buscar($idEmpresa)) {
-            $exito = $empresa->eliminar();
-            echo "\nEmpresa eliminada con exito. \n";
+            try{
+                if ($empresa->eliminar()) {
+                    $exito = true;
+                    echo "\nEmpresa eliminada con exito. \n";
+                } else {
+                    echo "\nError al eliminar la empresa";
+                }
+            } catch(mysqli_sql_exception $e){
+                echo "\nLa empresa que intentó eliminar es parte de otros viajes, primero debe modificar o eliminar dichos viajes para eliminar la empresa";
+            }
+            
+
         } else {
             echo "\nEmpresa no encontrada";
         }

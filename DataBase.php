@@ -90,7 +90,7 @@ class DataBase {
             if($temp = mysqli_fetch_assoc($this->RESULT)){
                 $resp = $temp;
             }else{
-                mysqli_free_result($this->RESULT);
+                mysqli_free_result($this->RESULT);                                              
             }
         }else{
             $this->ERROR = mysqli_errno($this->CONEXION) . ": " . mysqli_error($this->CONEXION);

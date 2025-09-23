@@ -95,7 +95,7 @@ include_once "Persona.php";
         }
 
         //Metodo para modificar los datos de un responsable en la base de datos
-        public function modificar () {
+        public function modificarR () {
             $baseDatos = new DataBase;
             $persona = new Persona;
             $respuesta = false;
