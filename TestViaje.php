@@ -45,7 +45,7 @@ function menuPasajeros()
         echo "\n-------------------------------Menu Pasajeros-------------------------------\n";
         echo "1. Crear y agregar un pasajero a un viaje\n";
         echo "2. Modificar un pasajero\n";
-        echo "3. Listar los pajaeros\n";
+        echo "3. Listar los pasajeros\n";
         echo "4. Volver al menu principal\n";
         $opcion = trim(string: fgets(STDIN));
         switch ($opcion) {
@@ -317,7 +317,7 @@ function menuViajes()
         echo "\n-------------------------------Menu Viajes-------------------------------";
         echo "\n1. Crear viaje.";
         echo "\n2. Modificar un viaje";
-        echo "\n3. Eliminar un viaje;";
+        echo "\n3. Eliminar un viaje";
         echo "\n4. Listar viajes";
         echo "\n5. Volver al menu principal\n";
         $opcion = trim(fgets(STDIN));
@@ -365,6 +365,7 @@ function eliminarViaje($idViaje)
     $viaje = new Viaje();
     if ($viaje->buscar($idViaje)) {
         $viaje->eliminar();
+        echo "\nViaje eliminado con exito.\n";
     } else {
         echo "\nViaje no encontrado.\n";
     }

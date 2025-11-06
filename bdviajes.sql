@@ -46,7 +46,7 @@ CREATE TABLE pasajero (
     PRIMARY KEY (pdocumento),
 	FOREIGN KEY (idviaje) REFERENCES viaje (idviaje)	
     ON UPDATE CASCADE 
-    ON DELETE CASCADE,
+    ON DELETE RESTRICT,
     FOREIGN KEY (pdocumento) REFERENCES persona (documento)
     ON UPDATE CASCADE
     ON DELETE RESTRICT

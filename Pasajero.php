@@ -11,6 +11,13 @@
             $this->idViajePertenece = null;
         }
 
+        //Metodo constructor con valores
+        public function cargarPasajero ($pdocumento, $pnombre, $papellido,  $ptelefono, $idViaje) {
+            parent::cargar($pdocumento, $pnombre, $papellido);
+            $this ->setPtelefono($ptelefono);
+            $this ->setIdViaje($idViaje);
+        } 
+
         //Getters y setters
         public function getPtelefono () {
             return $this -> ptelefono;
@@ -40,12 +47,7 @@
             return $cadena;
         } 
 
-        //Metodo constructor con valores
-        public function cargarPasajero ($pdocumento, $pnombre, $papellido,  $ptelefono, $idViaje) {
-            parent::cargar($pdocumento, $pnombre, $papellido);
-            $this ->setPtelefono($ptelefono);
-            $this ->setIdViaje($idViaje);
-        } 
+        
 
         //Metodo para insertar un objeto pasajero en la base de datos
         public function insertar () {
