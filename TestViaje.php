@@ -46,19 +46,25 @@ function menuPasajeros()
         echo "1. Crear y agregar un pasajero a un viaje\n";
         echo "2. Modificar un pasajero\n";
         echo "3. Listar los pasajeros\n";
-        echo "4. Volver al menu principal\n";
+        echo "4. Eliminar un pasajero de un viaje\n";
+        echo "5. Volver al menu principal\n";
         $opcion = trim(string: fgets(STDIN));
         switch ($opcion) {
             case 1:
                 agregarPasajeroViaje();
                 break;
             case 2:
+                listarPasajeros();
                 modificarPasajeroMenu();
                 break;
             case 3:
                 listarPasajeros();
                 break;
             case 4:
+                listarPasajeros();
+                eliminarPasajeros();
+                break;
+            case 5:
                 $continuar = false;
                 break;
             default:
@@ -66,6 +72,21 @@ function menuPasajeros()
                 break;
         }
     } while ($continuar);
+}
+
+function eliminarPasajeros(){
+    echo "Ingrese el documento del pasajero que desea eliminar:";
+    $numDocumento = trim(fgets(STDIN));
+    $pasajero = new Pasajero();
+    if($pasajero->buscar($numDocumento)){
+        if($pasajero->eliminar()){
+            echo "Pasajero eliminado con exito.";
+        } else {
+            echo "No fue posible eliminar el pasajero.";
+        }
+    } else {
+        echo "Pasajero no encontrado.";
+    }
 }
 
 function modificarPasajero($numDoc, $nombre, $apellido, $telefono, $idViaje)
@@ -178,9 +199,11 @@ function menuResponsables()
                 listarResponsables();
                 break;
             case 3:
+                listarResponsables();
                 modificarResponsableMenu();
                 break;
             case 4:
+                listarResponsables();
                 eliminarResponsableMenu();
                 break;
             case 5:
@@ -272,7 +295,7 @@ function listarResponsables()
     $responsables = $responsable->listar();
     if ($responsables != null) {
         foreach ($responsables as $responsableViaje) {
-            echo "\n $responsableViaje \n";
+            echo "\n$responsableViaje\n";
         }
     } else {
         echo "\nNo existen responsables.\n";
@@ -327,9 +350,11 @@ function menuViajes()
                 menuCrearViaje();
                 break;
             case 2:
+                listarViajes();
                 modificarViajeMenu();
                 break;
             case 3:
+                listarViajes();
                 echo "\nIngrese la ID del viaje a eliminar\n";
                 $idViaje = trim(fgets(STDIN));
                 eliminarViaje($idViaje);

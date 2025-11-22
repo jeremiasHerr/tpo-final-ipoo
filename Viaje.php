@@ -238,7 +238,7 @@ Class Viaje {
                     $viaje = new Viaje();
                     $viaje->setIdViaje($viajeEncontrado['idviaje']);
                     $listaPasajeros = $pasajero->listar("idviaje= ".$viaje->getIdViaje());
-                    $viaje->cargar(
+                    $viaje->crear(
                         $viajeEncontrado['vdestino'],
                         $viajeEncontrado['vcantmaxpasajeros'],
                         $listaPasajeros,

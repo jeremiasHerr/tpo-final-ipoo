@@ -35,7 +35,7 @@ CREATE TABLE viaje (
     PRIMARY KEY (idviaje),
     FOREIGN KEY (idempresa) REFERENCES empresa (idempresa),
 	FOREIGN KEY (rnumeroempleado) REFERENCES responsable (rnumeroempleado)
-    ON UPDATE CASCADE
+    ON UPDATE RESTRICT
     ON DELETE RESTRICT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;
 	
@@ -52,6 +52,36 @@ CREATE TABLE pasajero (
     ON DELETE RESTRICT
     )ENGINE=InnoDB DEFAULT CHARSET=utf8; 
  
+-- Insertar 1 empresa
+INSERT INTO empresa (enombre, edireccion) 
+VALUES ('Viajes Felices S.A.', 'Calle Principal 123');
 
+-- Insertar 1 persona (responsable del viaje)
+INSERT INTO persona (documento, nombre, apellido) 
+VALUES ('12345678', 'Juan', 'Pérez');
+
+-- Insertar 1 responsable vinculado a esa persona
+INSERT INTO responsable (rnumerolicencia, rdocumento) 
+VALUES (987654321, '12345678');
+
+-- Insertar 2 viajes con el mismo responsable
+INSERT INTO viaje (vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte) 
+VALUES 
+  ('Buenos Aires', 50, 1, 1, 1500.00),
+  ('Mendoza', 40, 1, 1, 2000.00);
+
+-- Insertar 2 personas (pasajeros)
+INSERT INTO persona (documento, nombre, apellido) 
+VALUES 
+  ('11111111', 'Carlos', 'López'),
+  ('22222222', 'María', 'García');
+
+-- Insertar 1 pasajero para el primer viaje
+INSERT INTO pasajero (pdocumento, ptelefono, idviaje) 
+VALUES ('11111111', 1234567890, 1);
+
+-- Insertar 1 pasajero para el segundo viaje
+INSERT INTO pasajero (pdocumento, ptelefono, idviaje) 
+VALUES ('22222222', 9876543210, 2);
 
 
