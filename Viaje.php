@@ -147,23 +147,27 @@ Class Viaje {
         if ($dataBase->Iniciar()) {
             if ($dataBase->ejecutar($consulta)) {
                 if ($viaje = $dataBase->registro()) {
-                    $pasajero = new Pasajero();
-                    $this->setIdViaje($idviaje);
-                    $empresa = new Empresa();
-                    $empresa->setIdEmpresa($viaje['idempresa']);
-                    $empleado = new ResponsableViaje();
-                    $empleado->setRnumeroEmpleado($viaje['rnumeroempleado']);
-                    $empleado->buscar($viaje['rnumeroempleado']);
-                    $this->crear(
-                        $viaje['vdestino'],
-                        $viaje['vcantmaxpasajeros'],
-                        [],
-                        $empleado,
-                        $viaje['vimporte'],
-                        $empresa,
-                    );
-                    $rta = true;
-                } 
+                    if (!is_array($viaje)) {
+                        $this->setMensajeOperacion($dataBase->getError());
+                    } else {
+                        $pasajero = new Pasajero();
+                        $this->setIdViaje($idviaje);
+                        $empresa = new Empresa();
+                        $empresa->setIdEmpresa($viaje['idempresa']);
+                        $empleado = new ResponsableViaje();
+                        $empleado->setRnumeroEmpleado($viaje['rnumeroempleado']);
+                        $empleado->buscar($viaje['rnumeroempleado']);
+                        $this->crear(
+                            $viaje['vdestino'],
+                            $viaje['vcantmaxpasajeros'],
+                            [],
+                            $empleado,
+                            $viaje['vimporte'],
+                            $empresa,
+                        );
+                        $rta = true;
+                    }
+                }
             } else {
                 $this->setMensajeOperacion($dataBase->getError());
             }
@@ -202,11 +206,27 @@ Class Viaje {
     public function eliminar() {
         $dataBase = new DataBase();
         $rta = false;
-        $consulta = "DELETE FROM viaje WHERE idviaje = '" . $this->getIdViaje() . "'";
 
+        // Primero verificar si existen pasajeros asociados al viaje
+        $consultaCheck = "SELECT COUNT(*) as cant FROM pasajero_viaje WHERE idviaje = " . $this->getIdViaje();
         if ($dataBase->Iniciar()) {
-            if($dataBase->ejecutar($consulta)) {
-                $rta = true;
+            if ($dataBase->ejecutar($consultaCheck)) {
+                $registro = $dataBase->registro();
+                $cant = 0;
+                if (is_array($registro) && array_key_exists('cant', $registro)) {
+                    $cant = (int)$registro['cant'];
+                }
+                if ($cant > 0) {
+                    $this->setMensajeOperacion("No se puede eliminar el viaje: existen pasajeros asociados.");
+                    return false;
+                }
+                // Si no hay pasajeros, proceder a eliminar
+                $consulta = "DELETE FROM viaje WHERE idviaje = '" . $this->getIdViaje() . "'";
+                if ($dataBase->ejecutar($consulta)) {
+                    $rta = true;
+                } else {
+                    $this->setMensajeOperacion($dataBase->getError());
+                }
             } else {
                 $this->setMensajeOperacion($dataBase->getError());
             }
@@ -230,6 +250,9 @@ Class Viaje {
             if ($dataBase->ejecutar($consulta)) {
                 $viajes = [];
                 while ($viajeEncontrado = $dataBase->registro()) {
+                    if (!is_array($viajeEncontrado)) {
+                        continue;
+                    }
                     $pasajero = new Pasajero();
                     $responsable = new ResponsableViaje();
                     $responsable->buscar($viajeEncontrado['rnumeroempleado']);

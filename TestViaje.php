@@ -173,6 +173,8 @@ function agregarPasajeroViaje()
         $pasajero->cargarPasajero($numDoc, $nombre, $apellido, $numTelefono, $idViaje);
         if ($pasajero->insertar()) {
             echo "\nPasajero creado exitosamente\n";
+        } else {
+            echo "\nNo fue posible crear el pasajero\n";
         }
     } else {
         echo "\nNo existe un viaje con ese ID.\n";
@@ -389,8 +391,12 @@ function eliminarViaje($idViaje)
 {
     $viaje = new Viaje();
     if ($viaje->buscar($idViaje)) {
-        $viaje->eliminar();
-        echo "\nViaje eliminado con exito.\n";
+        if($viaje->eliminar()){
+            echo "\nViaje eliminado con exito.\n";
+        } else {
+            echo $viaje->getMensajeOperacion();
+        }
+        
     } else {
         echo "\nViaje no encontrado.\n";
     }
