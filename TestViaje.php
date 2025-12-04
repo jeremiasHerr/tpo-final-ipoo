@@ -75,17 +75,20 @@ function menuPasajeros()
 }
 
 function eliminarPasajeros(){
-    echo "Ingrese el documento del pasajero que desea eliminar:";
+    listarViajes();
+    echo "\nIngrese la ID del viaje del que desea eliminar el pasajero: ";
+    $idViaje = trim(fgets(STDIN));
+    echo "Ingrese el documento del pasajero que desea eliminar: ";
     $numDocumento = trim(fgets(STDIN));
     $pasajero = new Pasajero();
-    if($pasajero->buscar($numDocumento)){
+    if($pasajero->buscar($numDocumento, $idViaje)){
         if($pasajero->eliminar()){
             echo "Pasajero eliminado con exito.";
         } else {
             echo "No fue posible eliminar el pasajero.";
         }
     } else {
-        echo "Pasajero no encontrado.";
+        echo "Pasajero no encontrado en ese viaje.";
     }
 }
 

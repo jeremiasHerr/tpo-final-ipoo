@@ -76,8 +76,6 @@
                 $idViajeVal = $idViajeVal->getIdViaje();
             }
 
-            // Insertar en pasajero_viaje (tabla de relación M:N)
-            // Insertar en pasajero_viaje (tabla de relación M:N)
             $consultaInsertar = 
             "INSERT INTO pasajero_viaje(pdocumento, ptelefono, idviaje) 
             VALUES ('" . $this->getDocumento() . "',
