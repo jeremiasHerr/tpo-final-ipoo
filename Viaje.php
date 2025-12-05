@@ -183,11 +183,11 @@ Class Viaje {
 
         $consulta = "UPDATE viaje SET 
         vdestino='" . $this->getvDestino() . "',
-        vcantmaxpasajeros= '" . $this->getvCantMaxPasajeros() . "',
-        idempresa= '" . $this->getObjEmpresa()->getIdEmpresa() . "',
-        rnumeroempleado= '" . $this->getObjResponsableV()->getRnumeroEmpleado() . "',
-        vimporte= '" . $this->getvImporte() . "'
-        WHERE idviaje= " . $this->getIdViaje();
+        vcantmaxpasajeros=" . (int)$this->getvCantMaxPasajeros() . ",
+        idempresa=" . (int)$this->getObjEmpresa()->getIdEmpresa() . ",
+        rnumeroempleado=" . (int)$this->getObjResponsableV()->getRnumeroEmpleado() . ",
+        vimporte=" . (float)$this->getvImporte() . "
+        WHERE idviaje=" . (int)$this->getIdViaje();
         $rta = false;
 
         if ($dataBase->Iniciar()) {

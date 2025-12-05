@@ -1,4 +1,3 @@
-CREATE DATABASE bdviajes;
 
 CREATE TABLE empresa(
     idempresa bigint AUTO_INCREMENT,
@@ -39,19 +38,27 @@ CREATE TABLE viaje (
     ON DELETE RESTRICT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;
 	
+
+CREATE TABLE pasajero (
+    pdocumento varchar(15),
+    ptelefono int,
+    PRIMARY KEY (pdocumento),
+    FOREIGN KEY (pdocumento) REFERENCES persona (documento)
+    ON UPDATE RESTRICT
+    ON DELETE RESTRICT
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- Tabla de relación M:N entre persona y viaje
 CREATE TABLE pasajero_viaje (
     pdocumento varchar(15),
     idviaje bigint,
-    ptelefono int,
     PRIMARY KEY (pdocumento, idviaje),
-    FOREIGN KEY (pdocumento) REFERENCES persona (documento)
+    FOREIGN KEY (pdocumento) REFERENCES pasajero (pdocumento)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
-    FOREIGN KEY (idviaje) REFERENCES viaje (idviaje)	
+    FOREIGN KEY (idviaje) REFERENCES viaje (idviaje) 	
     ON UPDATE CASCADE 
     ON DELETE RESTRICT
-    )ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+)ENGINE=InnoDB DEFAULT CHARSET=utf8; 
  
 INSERT INTO empresa (enombre, edireccion) 
 VALUES ('Viajes Felices S.A.', 'Calle Principal 123');
@@ -64,16 +71,24 @@ VALUES (987654321, '12345678');
 
 INSERT INTO viaje (vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte) 
 VALUES 
-  ('Buenos Aires', 50, 1, 1, 1500.00),
-  ('Mendoza', 40, 1, 1, 2000.00);
+    ('Buenos Aires', 50, 1, 1, 1500.00),
+    ('Mendoza', 40, 1, 1, 2000.00);
 
 INSERT INTO persona (documento, nombre, apellido) 
 VALUES 
-  ('11111111', 'Carlos', 'López'),
-  ('22222222', 'María', 'García');
+    ('11111111', 'Carlos', 'López'),
+    ('22222222', 'María', 'García');
 
-INSERT INTO pasajero_viaje (pdocumento, ptelefono, idviaje) 
-VALUES ('11111111', 1234567890, 1);
+-- Agrego registros en tabla pasajero (hereda persona conceptualmente)
+INSERT INTO pasajero (pdocumento, ptelefono)
+VALUES ('11111111', 1234567890);
 
-INSERT INTO pasajero_viaje (pdocumento, ptelefono, idviaje) 
-VALUES ('22222222', 9876543210, 2);
+INSERT INTO pasajero (pdocumento, ptelefono)
+VALUES ('22222222', 9876543210);
+
+-- Inserto las relaciones pasajero_viaje sin telefono (solo documento y idviaje)
+INSERT INTO pasajero_viaje (pdocumento, idviaje) 
+VALUES ('11111111', 1);
+
+INSERT INTO pasajero_viaje (pdocumento, idviaje) 
+VALUES ('22222222', 2);

@@ -1,5 +1,6 @@
 <?php
     include_once "Persona.php";
+    include_once "PasajeroViaje.php";
     class Pasajero extends Persona {
         private $ptelefono;
         private $idViajePertenece;
@@ -42,12 +43,12 @@
         public function __toString () {
             $cadena = parent::__toString();
             $cadena .=
-            "El telefono es: " . $this->getPtelefono() . "\n".
-            "El id del viaje es: " . $this->getIdViaje()->getIdViaje() . "\n" ."\n";
+            "El telefono es: " . $this->getPtelefono() . "\n";
+            if (is_object($this->getIdViaje())) {
+                $cadena .= "El id del viaje es: " . $this->getIdViaje()->getIdViaje() . "\n" ."\n";
+            }
             return $cadena;
         } 
-
-        
 
         //Metodo para insertar un objeto pasajero en la base de datos
         public function insertar () {
@@ -61,97 +62,140 @@
                 $personaExiste = true;
             }
 
-            //si no existe se inserta normalmente
+            //si no existe se inserta persona
             if (!$personaExiste) {
                 if (!parent::insertar()) {
-                    // No se pudo insertar la persona -> no seguimos
                     $this->setMensajeOperacion(parent::getMensajeoperacion() ?: $this->getMensajeOperacion());
                     return false;
                 }
             }
 
-            // Determinar valor de idviaje (puede ser objeto Viaje o int)
-            $idViajeVal = $this->getIdViaje();
-            if (is_object($idViajeVal) && method_exists($idViajeVal, 'getIdViaje')) {
-                $idViajeVal = $idViajeVal->getIdViaje();
-            }
-
-            $consultaInsertar = 
-            "INSERT INTO pasajero_viaje(pdocumento, ptelefono, idviaje) 
-            VALUES ('" . $this->getDocumento() . "',
-                    '" . $this->getPtelefono() . "',
-                    '" . $idViajeVal . "'
-                    )";
-
+            // Inserto/actualizo registro en tabla pasajero (telefono)
+            $consultaExiste = "SELECT * FROM pasajero WHERE pdocumento = '" . $this->getDocumento() . "'";
             if ($baseDatos->Iniciar()) {
-                if ($baseDatos->ejecutar($consultaInsertar)) {
-                    $pasajero = true;
-                } else {
-                    $this->setMensajeOperacion($baseDatos->getError());
-                }
-            } else {
-                $this->setMensajeOperacion($baseDatos->getError());
-            }
-
-            return $pasajero;
-        }
-
-        //Metodo que busca un pasajero segun su documento y viaje
-        // Si $idviaje es null, devuelve el primer pasajero encontrado para ese documento
-        public function buscar($pdocumento, $idviaje = null) {
-            $baseDatos = new DataBase;
-            $consulta = "SELECT * FROM pasajero_viaje WHERE pdocumento ='" . $pdocumento . "'";
-            if ($idviaje !== null) {
-                $consulta .= " AND idviaje = '" . $idviaje . "'";
-            }
-            $respuesta = false;
-            if ($baseDatos->Iniciar()) {
-                if ($baseDatos->ejecutar($consulta)) {
-                    if ($pasajero = $baseDatos->registro()) {
-                        if (!is_array($pasajero)) {
+                if ($baseDatos->ejecutar($consultaExiste)) {
+                    $existe = $baseDatos->registro();
+                    if (!$existe) {
+                        $consultaInsertarPasajero = "INSERT INTO pasajero(pdocumento, ptelefono) VALUES ('" . $this->getDocumento() . "', '" . $this->getPtelefono() . "')";
+                        if (!$baseDatos->ejecutar($consultaInsertarPasajero)) {
                             $this->setMensajeOperacion($baseDatos->getError());
-                        } else {
-                            $viaje = new Viaje;
-                            $viaje->buscar($pasajero['idviaje']);
-                            parent::buscar($pasajero['pdocumento']);
-                            $this->setPtelefono($pasajero['ptelefono']);
-                            $this -> cargarPasajero(
-                                parent::getDocumento(),
-                                parent::getNombre(),
-                                parent::getApellido(),
-                                $pasajero['ptelefono'],
-                                $viaje
-                            );
-                            $respuesta = true;
+                            return false;
+                        }
+                    } else {
+                        // si existe, actualizar telefono
+                        $consultaUpdate = "UPDATE pasajero SET ptelefono = '" . $this->getPtelefono() . "' WHERE pdocumento = '" . $this->getDocumento() . "'";
+                        if (!$baseDatos->ejecutar($consultaUpdate)) {
+                            $this->setMensajeOperacion($baseDatos->getError());
+                            return false;
                         }
                     }
                 } else {
                     $this->setMensajeOperacion($baseDatos->getError());
+                    return false;
                 }
             } else {
                 $this->setMensajeOperacion($baseDatos->getError());
+                return false;
             }
-            return $respuesta;
+
+            // Si se especificó un viaje, insertar relación en pasajero_viaje
+            $idViajeVal = $this->getIdViaje();
+            if ($idViajeVal !== null) {
+                if (is_object($idViajeVal) && method_exists($idViajeVal, 'getIdViaje')) {
+                    $idViajeVal = $idViajeVal->getIdViaje();
+                }
+                $consultaRel = "INSERT INTO pasajero_viaje(pdocumento, idviaje) VALUES ('" . $this->getDocumento() . "', '" . $idViajeVal . "')";
+                if ($baseDatos->Iniciar()) {
+                    if (!$baseDatos->ejecutar($consultaRel)) {
+                        $this->setMensajeOperacion($baseDatos->getError());
+                        return false;
+                    }
+                } else {
+                    $this->setMensajeOperacion($baseDatos->getError());
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        //Metodo que busca un pasajero segun su documento y viaje
+        // Si $idviaje es null, devuelve el primer pasajero encontrado para ese documento (si existe relación)
+        public function buscar($pdocumento, $idviaje = null) {
+            $baseDatos = new DataBase;
+            $respuesta = false;
+
+            // Buscar la relación en pasajero_viaje (opcional)
+            $consultaRel = "SELECT * FROM pasajero_viaje WHERE pdocumento = '" . $pdocumento . "'";
+            if ($idviaje !== null) {
+                $consultaRel .= " AND idviaje = '" . $idviaje . "'";
+            }
+
+            $idViajeEncontrado = null;
+            if ($baseDatos->Iniciar()) {
+                if ($baseDatos->ejecutar($consultaRel)) {
+                    $fila = $baseDatos->registro();
+                    if ($fila && is_array($fila) && array_key_exists('idviaje', $fila)) {
+                        $idViajeEncontrado = $fila['idviaje'];
+                    }
+                } else {
+                    $this->setMensajeOperacion($baseDatos->getError());
+                    return false;
+                }
+            } else {
+                $this->setMensajeOperacion($baseDatos->getError());
+                return false;
+            }
+
+            // Buscar datos en persona
+            if (!parent::buscar($pdocumento)) {
+                return false;
+            }
+
+            // Buscar telefono en tabla pasajero
+            $consultaPas = "SELECT * FROM pasajero WHERE pdocumento = '" . $pdocumento . "'";
+            if ($baseDatos->Iniciar()) {
+                if ($baseDatos->ejecutar($consultaPas)) {
+                    $filaP = $baseDatos->registro();
+                    if ($filaP && is_array($filaP) && array_key_exists('ptelefono', $filaP)) {
+                        $this->setPtelefono($filaP['ptelefono']);
+                    }
+                } else {
+                    $this->setMensajeOperacion($baseDatos->getError());
+                    return false;
+                }
+            } else {
+                $this->setMensajeOperacion($baseDatos->getError());
+                return false;
+            }
+
+            // Si se encontró idviaje, cargar objeto Viaje
+            $viajeObj = null;
+            if ($idViajeEncontrado !== null) {
+                $viajeObj = new Viaje();
+                $viajeObj->buscar($idViajeEncontrado);
+            }
+
+            $this->cargarPasajero(
+                parent::getDocumento(),
+                parent::getNombre(),
+                parent::getApellido(),
+                $this->getPtelefono(),
+                $viajeObj
+            );
+
+            return true;
         }
 
         //Metodo para modificar los datos de un pasajero
         public function modificar () {
             $baseDatos = new DataBase();
+            $rta = false;
             if (parent::modificar()) {
-                // Determinar valor de idviaje (puede ser objeto Viaje o int)
-                $idViajeVal = $this->getIdViaje();
-                if (is_object($idViajeVal) && method_exists($idViajeVal, 'getIdViaje')) {
-                    $idViajeVal = $idViajeVal->getIdViaje();
-                }
-
-                $consulta = "UPDATE pasajero_viaje SET 
-                            ptelefono= '". $this->getPtelefono() ."'
-                            WHERE pdocumento ='". $this->getDocumento() ."' 
-                            AND idviaje = '". $idViajeVal ."'";
-                $respuesta = false;
+                $consulta = "UPDATE pasajero SET ptelefono = '" . $this->getPtelefono() . "' WHERE pdocumento = '" . $this->getDocumento() . "'";
                 if ($baseDatos->Iniciar()) {
                     if ($baseDatos->ejecutar($consulta)) {
-                        $respuesta = true;
+                        $rta = true;
                     } else {
                         $this->setMensajeOperacion($baseDatos->getError());
                     }
@@ -159,13 +203,12 @@
                     $this->setMensajeOperacion($baseDatos->getError());
                 }
             }
-            return $respuesta;
+            return $rta;
         }
 
         //Metodo para eliminar un pasajero de un viaje específico
         public function eliminar () {
             $baseDatos = new DataBase;
-            // Determinar valor de idviaje (puede ser objeto Viaje o int)
             $idViajeVal = $this->getIdViaje();
             if (is_object($idViajeVal) && method_exists($idViajeVal, 'getIdViaje')) {
                 $idViajeVal = $idViajeVal->getIdViaje();
@@ -190,6 +233,7 @@
         public function listar($condicion = "") {
             $arregloPasajero = null;
             $baseDatos = new DataBase();
+            $baseDatosAux = new DataBase();
             $consulta = "SELECT * FROM pasajero_viaje ";
             if ($condicion != "") {
                 $consulta .= "WHERE $condicion ";
@@ -207,11 +251,22 @@
                         $persona = new Persona();
                         $documento=$pasajeroEncontrado['pdocumento'];
                         $persona->buscar($documento);
+                        // obtener telefono desde tabla pasajero (usar baseDatosAux para no interrumpir el loop)
+                        $consultaTel = "SELECT ptelefono FROM pasajero WHERE pdocumento = '" . $documento . "'";
+                        $ptelefono = 0;
+                        if ($baseDatosAux->Iniciar()) {
+                            if ($baseDatosAux->ejecutar($consultaTel)) {
+                                $filaTel = $baseDatosAux->registro();
+                                if (is_array($filaTel) && array_key_exists('ptelefono', $filaTel)) {
+                                    $ptelefono = $filaTel['ptelefono'];
+                                }
+                            }
+                        }
                         $pasajero->cargarPasajero(
                             $persona->getDocumento(),
                             $persona->getNombre(),
                             $persona->getApellido(),
-                            $pasajeroEncontrado['ptelefono'],
+                            $ptelefono,
                             $viaje
                             );
                         array_push($arregloPasajero, $pasajero);

@@ -488,6 +488,7 @@ function modificarViaje($idViaje, $nuevoDestino, $nuevaCantidadMaxima, $pasajero
                         $viaje->setObjResponsableV($responsableViaje);
                         $viaje->setvImporte($nuevoImporteViaje);
                         $viaje->setvDestino($nuevoDestino);
+                        $viaje->modificar();
                         $exito = true;
                     } else {
                         echo "\nViaje a modificar no encontrado\n";
