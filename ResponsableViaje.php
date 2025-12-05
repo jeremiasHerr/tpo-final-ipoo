@@ -44,21 +44,43 @@ include_once "Persona.php";
 
 
         //Constructor con valores
-        public function cargarRe($pdocumento, $pnombre, $papellido, $numeroLicencia,$numeroEmpleado) {
+        public function cargarRe($pdocumento, $pnombre, $papellido, $numeroLicencia) {
             parent::cargar($pdocumento, $pnombre, $papellido);
             $this ->setRnumeroLicencia($numeroLicencia);
-            $this ->setRnumeroEmpleado($numeroEmpleado);
         }
 
         //Metodo para instertar los datos de un objeto a la base de datos
         public function insertar() {
             $baseDatos = new DataBase;
             $resultado = false;
-            if (parent::insertar()) {
-            $consultaInsertar = "INSERT INTO responsable(rnumeroLicencia, rdocumento) 
-                                 VALUES (". $this->getRnumeroLicencia() .",
-                                       '". $this->getDocumento() ."')";
+
+            $personaObj = new Persona();
+            if (!$personaObj->buscar($this->getDocumento())) {
+                if (!parent::insertar()) {
+                    $this->setMensajeOperacion(parent::getMensajeoperacion() ?: $this->getMensajeOperacion());
+                    return false;
+                }
+            }
+
             if ($baseDatos->Iniciar()) {
+                $consultaCheck = "SELECT rnumeroempleado, rnumerolicencia FROM responsable WHERE rdocumento = '" . $this->getDocumento() . "'";
+                if ($baseDatos->ejecutar($consultaCheck)) {
+                    if ($registro = $baseDatos->registro()) {
+                        // ya existe: reutilizar datos y retornar éxito
+                        if (is_array($registro) && array_key_exists('rnumeroempleado', $registro)) {
+                            $this->setRnumeroEmpleado($registro['rnumeroempleado']);
+                            $this->setRnumeroLicencia($registro['rnumerolicencia']);
+                            return true;
+                        }
+                    }
+                } else {
+                    $this->setMensajeOperacion($baseDatos->getError());
+                    return false;
+                }
+
+                $consultaInsertar = "INSERT INTO responsable(rnumeroLicencia, rdocumento) 
+                                     VALUES (". $this->getRnumeroLicencia() .",
+                                           '". $this->getDocumento() ."')";
                 if ($id = $baseDatos->devuelveIDInsercion($consultaInsertar)) {
                     $this->setRnumeroEmpleado($id);
                     $resultado = true;
@@ -69,13 +91,12 @@ include_once "Persona.php";
                 $this->setMensajeOperacion($baseDatos->getError());
             }
             return $resultado;
-            }
         }
 
         //Metodo para buscar responsable por su numeroEmpleado
-        public function buscar ($rnumeroEmpleado) {
+        public function buscar ($rnumerolicencia) {
             $baseDatos = new DataBase();
-            $consulta = "SELECT * FROM responsable WHERE rnumeroempleado =". $rnumeroEmpleado ;
+            $consulta = "SELECT * FROM responsable WHERE rnumerolicencia =". $rnumerolicencia ;
             $respuesta = false;
             if($baseDatos->Iniciar()) {
                 if($baseDatos->Ejecutar($consulta)) {

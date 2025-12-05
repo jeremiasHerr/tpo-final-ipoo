@@ -33,7 +33,7 @@ class Persona
 
     public function getMensajeoperacion()
     {
-        return $this->mensajeoperacion;
+        return $this->mensajeOperacion;
     }
 
     public function setDocumento($value)
